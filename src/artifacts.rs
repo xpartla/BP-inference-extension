@@ -37,6 +37,11 @@ pub struct FeatureMask {
 }
 
 #[derive(Deserialize)]
+pub struct FeatureOrder{
+    pub final_features : Vec<String>,
+}
+
+#[derive(Deserialize)]
 pub struct Schema {
     pub numeric: Vec<String>,
     pub categorical: Vec<String>,
@@ -48,6 +53,7 @@ pub struct Artifacts {
     pub numeric: NumericMetadata,
     pub categorical: CategoricalMetadata,
     pub feature_mask: FeatureMask,
+    pub feature_order: FeatureOrder,
 }
 
 pub fn load_json<T: serde::de::DeserializeOwned>(path: &str) -> T {
@@ -69,11 +75,15 @@ impl Artifacts {
         let feature_mask: FeatureMask =
             load_json(&format!("{}/feature_mask.json", dir));
 
+        let feature_order: FeatureOrder =
+            load_json(&format!("{}/feature_order.json", dir));
+
         Self {
             schema,
             numeric,
             categorical,
             feature_mask,
+            feature_order
         }
     }
 }

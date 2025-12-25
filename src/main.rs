@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         record_num,
         record_cat,
         "artifacts",
-        "artifacts/lgbm.onnx"
+        "artifacts/lgbm_tensor.onnx"
     )?;
 
     println!("label: {}", prediction.label);

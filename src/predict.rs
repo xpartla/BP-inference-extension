@@ -1,8 +1,7 @@
 use std::collections::HashMap;
-use crate::artifacts::Artifacts;
+use crate::{Artifacts, OnnxModel, Prediction};
 use crate::encode::encode_categorical;
-use crate::model::{OnnxModel, Prediction};
-use crate::preprocess::{apply_feature_mask, preprocess_numeric};
+use crate::preprocess::{preprocess_numeric};
 
 pub fn predict(
     record_num: HashMap<String, Option<f64>>,
@@ -10,13 +9,35 @@ pub fn predict(
     artifacts: &Artifacts,
     model: &mut OnnxModel,
 ) -> Result<Prediction, ort::Error> {
-    let num = preprocess_numeric(&record_num, &artifacts.schema.numeric, &artifacts.numeric);
-    let cat = encode_categorical(&record_cat, &artifacts.categorical.categories);
 
-    let mut features = num;
-    features.extend(cat);
+    let numeric = preprocess_numeric(
+        &record_num,
+        &artifacts.schema.numeric,
+        &artifacts.numeric,
+    );
 
-    let final_features = apply_feature_mask(&features, &artifacts.feature_mask.indices);
+    let categorical = encode_categorical(
+        &record_cat,
+        &artifacts.categorical.categories,
+    );
 
-    model.predict(final_features)
+    let mut feature_map = numeric;
+    feature_map.extend(categorical);
+
+    let mut features =
+        Vec::with_capacity(artifacts.feature_order.final_features.len());
+
+    for name in &artifacts.feature_order.final_features {
+        let v = feature_map.get(name).unwrap_or_else(|| {
+            panic!("Feature '{}' missing after preprocessing", name)
+        });
+        features.push(*v);
+    }
+
+    assert_eq!(
+        features.len(),
+        artifacts.feature_order.final_features.len(),
+    );
+
+    model.predict(features)
 }

@@ -38,11 +38,16 @@ impl OnnxModel {
             .try_extract_tensor::<i64>()?
             .1[0];
 
-        let probabilities = outputs["probabilities"]
+        let probabilities = outputs["lgbmprobabilities"]
             .try_extract_tensor::<f32>()?
             .1
             .to_vec();
 
         Ok(Prediction { label, probabilities })
+    }
+
+    pub fn predict_probability(&mut self, input: Vec<f32>) -> Result<f32, ort::Error> {
+        let prediction = self.predict(input)?;
+        Ok(prediction.probabilities[1])
     }
 }
