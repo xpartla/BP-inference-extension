@@ -7,13 +7,14 @@ mod encode;
 mod model;
 mod predict;
 
-fn main() {
-    let model = OnnxModel::new("artifacts/lgbm.onnx");
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut model = OnnxModel::new("artifacts/lgbm.onnx")?;
 
     let dummy = vec![0.0; 50];
-    let p = model.expect("REASON").predict(dummy);
-    println!("Prediction: {:?}", p);
+    let prediction = model.predict(dummy)?;
+
+    println!("label: {}", prediction.label);
+    println!("probabilities: {:?}", prediction.probabilities);
+
+    Ok(())
 }
-// TODO: update MSVC to test build
-// TODO: end to end test
-// TODO: parity test
