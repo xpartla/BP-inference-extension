@@ -29,16 +29,8 @@ fn parity_single_sample() {
         .map(|v| v.as_f64().unwrap() as f32)
         .collect();
 
-    println!("Expected label: {}", expected_label);
-    println!("Expected probabilities: {:?}", expected_probs);
-    println!("Number of numeric features: {}", record_num.len());
-    println!("Number of categorical features: {}", record_cat.len());
-
     let mut model = OnnxModel::new("artifacts/lgbm_tensor.onnx").unwrap();
     let pred = predict(record_num, record_cat, &artifacts, &mut model).unwrap();
-
-    println!("Predicted label: {}", pred.label);
-    println!("Predicted probabilities: {:?}", pred.probabilities);
 
     assert_eq!(pred.label, expected_label,
                "Label mismatch: expected {} but got {}", expected_label, pred.label);
@@ -52,8 +44,6 @@ fn parity_single_sample() {
                 "Probability {} mismatch: expected {} but got {} (diff: {})",
                 i, expected, actual, diff);
     }
-
-    println!("✓ Parity test passed!");
 }
 
 #[test]
@@ -100,7 +90,5 @@ fn parity_all_samples() {
                     "Sample {}, Probability {}: expected {} but got {} (diff: {})",
                     i, j, expected, actual, diff);
         }
-
-        println!("✓ Sample {} passed", i);
     }
 }
